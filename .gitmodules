@@ -1,0 +1,3 @@
+[submodule "Horten/lib/AS3WebSocket"]
+	path = Horten/lib/AS3WebSocket
+	url = https://github.com/Worlize/AS3WebSocket.git
