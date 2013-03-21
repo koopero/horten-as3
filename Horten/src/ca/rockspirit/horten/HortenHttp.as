@@ -2,10 +2,12 @@ package ca.rockspirit.horten
 {
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.TimerEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
+	import flash.utils.Timer;
 
 	public class HortenHttp extends HortenListener
 	{
@@ -29,6 +31,67 @@ package ca.rockspirit.horten
 			*/
 		}
 		
+		//	---------------------
+		//	Auto Push / Auto Pull
+		//	---------------------
+		
+		protected var _pushTimer:Timer;
+		protected var _pullTimer:Timer;
+		
+		public function set autoPush ( seconds:Number ):void {
+			if ( seconds > 0 && !isNaN ( seconds ) ) {
+				if ( !_pushTimer ) {
+					_pushTimer = new Timer ( seconds * 1000 );
+					_pushTimer.addEventListener(TimerEvent.TIMER, onAutoPush );
+					_pushTimer.start();
+				} else {
+					_pushTimer.delay = seconds * 1000;
+				}
+			} else if ( _pushTimer ) {
+				_pushTimer.removeEventListener(TimerEvent.TIMER, onAutoPush );
+				_pushTimer.stop();
+				_pushTimer = null;
+			}
+		}
+		
+		public function get autoPush ():Number {
+			return _pushTimer ? _pushTimer.delay / 1000.0 : 0;
+		}
+		
+		public function set autoPull ( seconds:Number ):void {
+			if ( seconds > 0 && !isNaN ( seconds ) ) {
+				if ( !_pullTimer ) {
+					_pullTimer = new Timer ( seconds * 1000 );
+					_pullTimer.addEventListener(TimerEvent.TIMER, onAutoPull );
+					_pullTimer.start();
+				} else {
+					_pullTimer.delay = seconds * 1000;
+				}
+			} else if ( _pullTimer ) {
+				_pullTimer.removeEventListener(TimerEvent.TIMER, onAutoPull );
+				_pullTimer.stop();
+				_pullTimer = null;
+			}
+		}
+		
+		public function get autoPull ():Number {
+			return _pullTimer ? _pullTimer.delay / 1000.0 : 0;
+		}
+		
+		
+		protected function onAutoPull ( e:Event ):void {
+			pull ();
+		}
+		
+		protected function onAutoPush ( e:Event ):void {
+			push ();
+		}
+		
+		
+		//	-----------
+		//	Push / Pull
+		//	-----------
+		
 		public override function push ( path:* = null ):void {
 			var pathStr:String = Horten.pathString( path );
 			
@@ -46,7 +109,7 @@ package ca.rockspirit.horten
 			
 		}
 		
-		protected function pull ():void {
+		public function pull ():void {
 			
 			var req:URLRequest = new URLRequest ( _url );
 			req.method = URLRequestMethod.GET;

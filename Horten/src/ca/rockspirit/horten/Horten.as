@@ -299,7 +299,7 @@ package ca.rockspirit.horten
 				}
 			}
 			
-			path = path.filter ( function ( el:* ):Boolean {
+			path = path.filter ( function ( el:*, index:int, array:Array ):Boolean {
 				return ( ( el as String ) && el.length > 0 );
 			} );
 			
