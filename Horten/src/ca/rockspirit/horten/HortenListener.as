@@ -130,6 +130,11 @@ package ca.rockspirit.horten
 		//	----
 		
 		public function set path ( p:* ):void {
+			if ( !p ) {
+				remove();
+				return;
+			}
+			
 			p = Horten.pathString( p );
 			
 			if ( p == _hortenPath )
@@ -151,7 +156,7 @@ package ca.rockspirit.horten
 			}
 		}
 		
-		public function get ( path:* ):* {
+		public function get ( path:* = null ):* {
 			if ( _horten ) {
 				return _horten.get( _hortenPath + Horten.pathString( path ) );
 			}

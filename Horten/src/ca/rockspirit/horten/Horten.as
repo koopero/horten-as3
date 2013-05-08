@@ -7,6 +7,8 @@ package ca.rockspirit.horten
 		// Magic object to declare that data needs to be fetched.
 		internal static const FILL_DATA:Object = {};
 		
+		public var debug:Boolean = false;
+		
 		// Our actual data
 		protected var _data:Object = {};
 		
@@ -16,6 +18,19 @@ package ca.rockspirit.horten
 				__instance = this;
 			}
 		}
+		
+		//	-------------
+		//	Static Access
+		//	-------------
+		
+		public static function set ( path:*, value:*, fromListener:HortenListener = null ):void {
+			getInstance().set( path, value, fromListener );
+		}
+		
+		public static function get ( path:* = null ):* {
+			return getInstance().get( path );
+		}
+		
 		
 		//	-------------------
 		//	Getting and Setting
@@ -40,6 +55,10 @@ package ca.rockspirit.horten
 			}
 		}
 		
+
+		
+		
+		
 		public function setMultiple ( values:Object, fromListener:HortenListener = null ):void {
 			
 			var triggers:Object = {};
@@ -50,8 +69,8 @@ package ca.rockspirit.horten
 				
 				var value:* = values[path];
 				
-				
-				trace ( "horten", path, '=>', value );
+				if ( debug )
+					trace ( "horten", path, '=>', value );
 				
 				var pa:Array 	= pathArray( path );
 				var ps:String 	= pathString( path );
@@ -153,6 +172,63 @@ package ca.rockspirit.horten
 			}
 			
 			
+		}
+		
+		//	---------------------------
+		//	Searching ( Experimental! )
+		//	---------------------------
+		
+		public function first ( path:*, search:* ):* 
+		{
+			var all:Object = this.get ( path );
+			if ( !all )
+				return null;
+			
+			for ( var k:String in all ) {
+				var v:* = all[k];
+				if ( searchOne ( v, search ) )
+					return v;
+			}
+			
+			return null;
+		}
+		
+		public function search ( path:*, search:* = null ):Array
+		{
+			var all:Object = this.get ( path );
+			if ( !all )
+				return null;
+			
+			var ret:Array = [];
+			
+			for ( var k:String in all ) {
+				var v:* = all[k];
+				if ( searchOne ( v, search ) )
+					ret.push( v );
+			}		
+			
+			return ret;
+		}
+		
+		protected static function searchOne ( a:Object, b:Object ):Boolean
+		{
+			if ( b === null )
+				return true;
+			
+			for ( var k:String in b ) {
+				var av:* = a[k];
+				var bv:* = b[k];
+				
+				if ( isDynamic ( bv ) && isDynamic ( av ) ) {
+					if ( !searchOne ( av, bv ) )
+						return false;
+				} else {
+					if ( av != bv )
+						return false;
+				}
+			}
+			
+			return true;
 		}
 		
 		//	------------------
